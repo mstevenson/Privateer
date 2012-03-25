@@ -31,6 +31,7 @@ public static class Privateer {
 		return asm.GetType (String.Format ("{0}.{1}", referenceClass.Namespace, targetClass));
 	}
 	
+	
 	/// <summary>
 	/// Find a private class within a given Unity namespace.
 	/// </summary>
@@ -40,6 +41,20 @@ public static class Privateer {
 	/// should hopefully not change with future Unity updates.
 	/// </remarks>
 	public static Type GetType (UnityNamespace ns, string targetClass)
+	{
+		Assembly asm = UnityAssembly (ns);
+		return asm.GetType (String.Format ("{0}.{1}", ns.ToString (), targetClass));
+	}
+	
+	
+	public static Type[] GetTypes (UnityNamespace ns)
+	{
+		Assembly asm = UnityAssembly (ns);
+		return asm.GetTypes ();
+	}
+	
+	
+	private static Assembly UnityAssembly (UnityNamespace ns)
 	{
 		Assembly asm;
 		switch (ns) {
@@ -62,7 +77,7 @@ public static class Privateer {
 			asm = null;
 			break;
 		}
-		return asm.GetType (String.Format ("{0}.{1}", ns.ToString(), targetClass));
+		return asm;
 	}
 	
 	#endregion

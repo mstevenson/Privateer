@@ -121,32 +121,41 @@ public static class Privateer {
 	#region Getters
 	
 	/// <summary>
-	/// Return the value of a static field or property
+	/// Get the value of a static field or property
 	/// </summary>
-	public static object Get<T> (string fieldName)
+	/// <typeparam name='T'>
+	/// The type that contains the given field
+	/// </typeparam>
+	/// <typeparam name='U'>
+	/// The field or property's return type
+	/// </typeparam>
+	public static object Get<T, U> (string fieldName)
 	{
 		var flags = BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
-		return typeof(T).InvokeMember (fieldName, flags, null, null, null);
+		return (U)typeof(T).InvokeMember (fieldName, flags, null, null, null);
 	}
 	
 	
 	/// <summary>
-	/// Return the value of a static field or property
+	/// Get the value of a static field or property
 	/// </summary>
-	public static object Get (Type type, string fieldName)
+	/// <typeparam name='U'>
+	/// The field or property's return type
+	/// </typeparam>
+	public static U Get<U> (Type type, string fieldName)
 	{
 		var flags = BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
-		return type.InvokeMember (fieldName, flags, null, null, null);
+		return (U)type.InvokeMember (fieldName, flags, null, null, null);
 	}
 	
 	
 	/// <summary>
 	/// Extension method to get the value of a field or property
 	/// </summary>
-	public static object Get<T> (this T instance, string fieldName)
+	public static U Get<T, U> (this T instance, string fieldName)
 	{
 		var flags = BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-		return typeof(T).InvokeMember (fieldName, flags, null, instance, null);
+		return (U)typeof(T).InvokeMember (fieldName, flags, null, instance, null);
 	}
 	
 	#endregion

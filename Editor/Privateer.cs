@@ -106,7 +106,7 @@ public static class Privateer {
 	
 	
 	/// <summary>
-	/// Extension method to invoke an instanced method
+	/// Extension method to invoke a method
 	/// </summary>
 	public static object Invoke<T> (this T instance, string methodName, params object[] parameters)
 	{
@@ -118,7 +118,7 @@ public static class Privateer {
 	#endregion
 	
 
-	#region Setters
+	#region Getters
 	
 	/// <summary>
 	/// Return the value of a static field or property
@@ -141,7 +141,7 @@ public static class Privateer {
 	
 	
 	/// <summary>
-	/// Return the value of a instanced field or property
+	/// Extension method to get the value of a field or property
 	/// </summary>
 	public static object Get<T> (this T instance, string fieldName)
 	{
@@ -152,7 +152,7 @@ public static class Privateer {
 	#endregion
 	
 	
-	#region Getters
+	#region Setters
 	
 	/// <summary>
 	/// Set the value of a static field or property
@@ -175,7 +175,7 @@ public static class Privateer {
 	
 	
 	/// <summary>
-	/// Set the value of a instanced field or property
+	/// Extension method to set the value of a instanced field or property
 	/// </summary>
 	public static void Set<T> (this T instance, string fieldName, object val)
 	{

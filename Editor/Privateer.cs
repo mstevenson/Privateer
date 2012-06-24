@@ -129,7 +129,7 @@ public static class Privateer {
 	/// <typeparam name='U'>
 	/// The field or property's return type
 	/// </typeparam>
-	public static object Get<T, U> (string fieldName)
+	public static U Get<T, U> (string fieldName)
 	{
 		var flags = BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
 		return (U)typeof(T).InvokeMember (fieldName, flags, null, null, null);

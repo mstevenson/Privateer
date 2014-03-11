@@ -16,46 +16,47 @@ public enum UnityNamespace
 
 
 /// <summary>
-/// Manipulate private fields, properties, and classes
+/// Manipulate Unity's private fields, properties, and methods.
 /// </summary>
 public static class Privateer {
 	
-	#region Class Discovery
+	#region Type Discovery
 	
 	/// <summary>
-	/// Find a private class in an assembly using a public class as a reference point.
+	/// Find a private or internal type using a public type in the same namespace as a reference point.
 	/// </summary>
-	public static Type GetType (Type referenceClass, string targetClass)
+	public static Type GetType (Type siblingType, string targetTypeName)
 	{
-		Assembly asm = Assembly.GetAssembly (referenceClass);
-		return asm.GetType (String.Format ("{0}.{1}", referenceClass.Namespace, targetClass));
+		Assembly asm = Assembly.GetAssembly (siblingType);
+		return asm.GetType (String.Format ("{0}.{1}", siblingType.Namespace, targetTypeName));
 	}
-	
 	
 	/// <summary>
-	/// Find a private class within a given Unity namespace.
+	/// Find a private or internal type within a given Unity namespace.
 	/// </summary>
-	/// <remarks>
-	/// We must use a reference to a public class as an anchor when searching
-	/// for a private class within the same assembly. The classes we're referencing
-	/// should hopefully not change with future Unity updates.
-	/// </remarks>
-	public static Type GetType (UnityNamespace ns, string targetClass)
+	public static Type GetType (UnityNamespace ns, string targetTypeName)
 	{
-		Assembly asm = UnityAssembly (ns);
-		return asm.GetType (String.Format ("{0}.{1}", ns.ToString (), targetClass));
+		Assembly asm = GetUnityAssembly (ns);
+		return asm.GetType (String.Format ("{0}.{1}", ns.ToString (), targetTypeName), true);
 	}
-	
-	
-	public static Type[] GetTypes (UnityNamespace ns)
+
+	/// <summary>
+	/// Get all public, private, and internal types from the given Unity namespace.
+	/// </summary>
+	public static Type[] GetAllTypes (UnityNamespace ns)
 	{
-		Assembly asm = UnityAssembly (ns);
+		Assembly asm = GetUnityAssembly (ns);
 		return asm.GetTypes ();
 	}
-	
-	
-	private static Assembly UnityAssembly (UnityNamespace ns)
+
+	/// <summary>
+	/// Gets the Unity Assembly associated with the given namespace.
+	/// </summary>
+	private static Assembly GetUnityAssembly (UnityNamespace ns)
 	{
+		// The types passed to GetAssembly are arbitrary, we just
+		// need a reference to a public type within each namespace
+		// in order to retrieve a reference to its containing assembly
 		Assembly asm;
 		switch (ns) {
 		case UnityNamespace.UnityEditor:
@@ -65,7 +66,7 @@ public static class Privateer {
 			asm = Assembly.GetAssembly (typeof(TreeEditor.TreeData));
 			break;
 		case UnityNamespace.UnityEditorInternal:
-			asm = Assembly.GetAssembly (typeof(UnityEditorInternal.Macros));
+			asm = Assembly.GetAssembly (typeof(UnityEditorInternal.AssetStore));
 			break;
 		case UnityNamespace.UnityEngine:
 			asm = Assembly.GetAssembly (typeof(UnityEngine.Types));
@@ -86,7 +87,7 @@ public static class Privateer {
 	#region Method Invocation
 	
 	/// <summary>
-	/// Invoke a static method
+	/// Invoke a static method implemented by the type T.
 	/// </summary>
 	public static object Invoke<T> (string methodName, params object[] parameters)
 	{
@@ -94,19 +95,28 @@ public static class Privateer {
 		return method.Invoke (null, parameters);
 	}
 	
-	
 	/// <summary>
-	/// Invoke a static method
+	/// Invoke a static method implemented by a known type.
 	/// </summary>
 	public static object Invoke (this Type type, string methodName, params object[] parameters)
 	{
 		MethodInfo method = type.GetMethod (methodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 		return method.Invoke (null, parameters);
 	}
-	
+
+	/// <summary>
+	/// Invoke a static method implemented by a type that is found by its namespace and type name.
+	/// </summary>
+	public static object Invoke (UnityNamespace ns, string typeName, string methodName, params object[] parameters)
+	{
+		var assembly = GetUnityAssembly (ns);
+		System.Type type = assembly.GetType (typeName, true);
+		MethodInfo method = type.GetMethod (methodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+		return method.Invoke (null, parameters);
+	}
 	
 	/// <summary>
-	/// Extension method to invoke a method
+	/// Extension method to invoke a method implemented by type T.
 	/// </summary>
 	public static object Invoke<T> (this T instance, string methodName, params object[] parameters)
 	{
@@ -135,7 +145,6 @@ public static class Privateer {
 		return (U)typeof(T).InvokeMember (fieldName, flags, null, null, null);
 	}
 	
-	
 	/// <summary>
 	/// Get the value of a static field or property
 	/// </summary>
@@ -147,7 +156,6 @@ public static class Privateer {
 		var flags = BindingFlags.GetField | BindingFlags.GetProperty | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
 		return (U)type.InvokeMember (fieldName, flags, null, null, null);
 	}
-	
 	
 	/// <summary>
 	/// Extension method to get the value of a field or property
@@ -172,7 +180,6 @@ public static class Privateer {
 		typeof(T).InvokeMember (fieldName, flags, null, null, new System.Object[] { val });
 	}
 	
-	
 	/// <summary>
 	/// Set the value of a static field or property
 	/// </summary>
@@ -181,7 +188,6 @@ public static class Privateer {
 		var flags = BindingFlags.SetField | BindingFlags.SetProperty | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
 		type.InvokeMember (fieldName, flags, null, null, new System.Object[] { val });
 	}
-	
 	
 	/// <summary>
 	/// Extension method to set the value of a instanced field or property
